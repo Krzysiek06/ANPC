@@ -679,7 +679,7 @@ __interrupt void epwm1ISR(void)
 
 
          if(res_on==1)
-         {
+         {//dodanie rezonansowych
              // Proportional Resonant Controller
              Kp_RC = kp3;//
              RC_exec(&rc_init_a3,Ialfaref-Ia,res_mx3);
