@@ -174,6 +174,10 @@ void main(void){
         RC_init(&rc_init_b11,11,rc_wcut,rc_ki11,Ts);
         kDC=0.1;
 
+        for (i=0; i<1000; i++){
+            tablicapll[i]=sinf(i*0.00628);
+        }
+
 
         while(1){
             // Za³czenie Buffora PWM Wentylatorów
@@ -348,6 +352,22 @@ __interrupt void epwm1ISR(void)
     Rinit=220;
     Iinit=5.4*(-Ud)/Rinit;
 
+    if (j>999) j=0;
+    Duty1 = tablicapll[j];
+    if(Duty1>=0.0){
+         EPwm1Regs.CMPA.bit.CMPA=Duty1*EPWM1_TIMER_TBPRD;
+         EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+         EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+         //Duty1f = 1;
+    }
+    if(Duty1<0.0){
+        EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+        EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+        EPwm3Regs.CMPA.bit.CMPA=-1.0*Duty1*EPWM3_TIMER_TBPRD;
+        //Duty1f = 0;
+    }
+    j=j+1;
+
     if(STOP_PRECH==1)
     {
         REL4_OFF
@@ -433,6 +453,7 @@ __interrupt void epwm1ISR(void)
     UDCon = 1.6 * (-Ud);
 
 
+
     switch (stan_pracy)
     {
     case ReadyToGo:
@@ -442,7 +463,10 @@ __interrupt void epwm1ISR(void)
             }
 
 
+
             break;
+
+
     case ReadyToPreCharge:
             if(-Ud>20 && RelayAC==0 && RelayDC==0 && RelayPRCH == 0 && START_PROC==0 && START_PRECH==1)
             {
@@ -455,6 +479,8 @@ __interrupt void epwm1ISR(void)
                 REL4_OFF
                 RelayPRCH=0;
             }
+
+
             break;
     case AcRelayOn:
             if(UDC>UDCon && START_PROC==1 && RelayDC==0 && RelayAC==0 && RelayPRCH==1)
@@ -821,6 +847,21 @@ __interrupt void epwm1ISR(void)
              EPwm3Regs.CMPA.bit.CMPA=-1.0*Duty1*EPWM3_TIMER_TBPRD;
              //Duty1f = 0;
          }
+         /*if(Duty1>=0.0){
+              EPwm1Regs.CMPA.bit.CMPA=Duty1*EPWM1_TIMER_TBPRD;
+              EPwm1Regs.TZCTL.bit.TZB=0x01; //Force TrpiZone PwmB High
+              EPwm2Regs.CMPA.bit.CMPA=(1-Duty1)*EPWM2_TIMER_TBPRD;
+              EPwm2Regs.TZCTL.bit.TZB=0x10; //Force TrpiZone PwmB Low
+              EPwm3Regs.CMPA.bit.CMPA=(1-Duty1)*EPWM3_TIMER_TBPRD;
+              EPwm3Regs.TZCTL.bit.TZB=0x01; //Force TrpiZone PwmB High
+              //Duty1f = 1;
+         }
+         if(Duty1<0.0){
+             EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+             EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+             EPwm3Regs.CMPA.bit.CMPA=-1.0*Duty1*EPWM3_TIMER_TBPRD;
+             //Duty1f = 0;
+         }*/
          if(Duty2>=0.0){
              EPwm4Regs.CMPA.bit.CMPA=Duty2*EPWM4_TIMER_TBPRD;
              EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM5_TIMER_TBPRD;
@@ -846,15 +887,15 @@ __interrupt void epwm1ISR(void)
     }else{
         EN_PWM_GROUP3_OFF;
         EN_PWM_GROUP2_OFF;
-        EN_PWM_GROUP1_OFF;
+        //EN_PWM_GROUP1_OFF;
 
-        ENABLE1_OFF;
+        //ENABLE1_OFF;
         ENABLE2_OFF;
         ENABLE3_OFF;
 
-        EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
-        EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
-        EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+        //EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+       // EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+        //EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
         EPwm4Regs.CMPA.bit.CMPA=0.0*EPWM4_TIMER_TBPRD;
         EPwm5Regs.CMPA.bit.CMPA=0.0*EPWM5_TIMER_TBPRD;
         EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM6_TIMER_TBPRD;

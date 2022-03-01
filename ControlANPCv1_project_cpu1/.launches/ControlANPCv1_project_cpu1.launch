@@ -7,8 +7,8 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS320F28388D.ccxml.Texas Instruments XDS100v3 USB Debug Probe_0/C28xx_CPU1" value="ControlANPCv1_project_cpu1"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.TMS320F28388D.ccxml.Texas Instruments XDS100v3 USB Debug Probe_0/C28xx_CPU2" value="ControlANPCv1_project_cpu1"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:ControlANPCv1_project_cpu1}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS320F28388D.ccxml.Texas Instruments XDS100v3 USB Debug Probe_0/C28xx_CPU1" value="C:\Users\kkali\OneDrive - Politechnika Warszawska\MoReSiC\ANPC\CCS Workspace\ControlANPCv1_project_cpu1\CPU1_FLASH\ControlANPCv1_project_cpu1.out"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS320F28388D.ccxml.Texas Instruments XDS100v3 USB Debug Probe_0/C28xx_CPU2" value="C:\Users\kkali\OneDrive - Politechnika Warszawska\MoReSiC\ANPC\CCS Workspace\ControlANPCv1_project_cpu1\CPU1_FLASH\ControlANPCv1_project_cpu1.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS320F28388D.ccxml.Texas Instruments XDS100v3 USB Debug Probe_0/C28xx_CPU1" value="C:\Users\kkali\OneDrive - Politechnika Warszawska\MoReSiC\git\ANPC\ControlANPCv1_project_cpu1\CPU1_FLASH\ControlANPCv1_project_cpu1.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.TMS320F28388D.ccxml.Texas Instruments XDS100v3 USB Debug Probe_0/C28xx_CPU2" value="C:\Users\kkali\OneDrive - Politechnika Warszawska\MoReSiC\git\ANPC\ControlANPCv1_project_cpu1\CPU1_FLASH\ControlANPCv1_project_cpu1.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/ControlANPCv1_project_cpu1"/>
 </listAttribute>
