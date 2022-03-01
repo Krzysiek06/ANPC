@@ -76,8 +76,8 @@
 #define REL6_ON  GpioDataRegs.GPCSET.bit.GPIO69=1;
 #define REL6_OFF  GpioDataRegs.GPCCLEAR.bit.GPIO69=1;
 
-#define REL7_ON  GpioDataRegs.GPCSET.bit.GPIO68;
-#define REL7_OFF  GpioDataRegs.GPCCLEAR.bit.GPIO68;
+#define REL7_ON  GpioDataRegs.GPCSET.bit.GPIO68=1;
+#define REL7_OFF  GpioDataRegs.GPCCLEAR.bit.GPIO68=1;
 
 #define GI0  GpioDataRegs.GPCDAT.bit.GPIO48;
 #define GI2  GpioDataRegs.GPCDAT.bit.GPIO49;

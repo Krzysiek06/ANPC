@@ -353,7 +353,7 @@ __interrupt void epwm1ISR(void)
             RelayAC = 0;
         }*/
 
-        REL2_OFF
+        REL7_OFF
         RelayAC = 0;
 
 
@@ -394,7 +394,7 @@ warunek=0;
         warunek=0;
         REL4_OFF
         RelayPRCH = 0;
-        REL2_OFF
+        REL7_OFF
         RelayAC = 0;
         StartPWM=0;
         flagaON = 0;
@@ -439,7 +439,7 @@ warunek=0;
     case AcRelayOn:
             if(UDC>UDCon && START_PROC==1 && RelayDC==0 && RelayAC==0 && RelayPRCH==1)
             {
-                REL2_ON
+                REL7_ON
                 RelayAC=1;
                 REL4_OFF
                 RelayPRCH = 0;
@@ -451,7 +451,7 @@ warunek=0;
             }
             else
             {
-                REL2_OFF
+                REL7_OFF
                 RelayAC=0;
                 timer=0;
             }
