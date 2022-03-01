@@ -259,9 +259,7 @@ void main(void){
                 writeDataSPI(0, 8, Duty1*1000+1500);
                 writeDataSPI(0, 9, Duty2*1000+1500);
                 break;
-            case 15:
-                writeDataSPI(0, 8, testModeOn*200);
-                break;
+
             case 20:
                 writeDataSPI(0, 8, Idramp*10+1500);
                 writeDataSPI(0, 9, (UDC-UDCramp)*10+1500);
@@ -348,25 +346,6 @@ __interrupt void epwm1ISR(void)
     Rinit=220;
     Iinit=5.4*(-Ud)/Rinit;
 
-    if(STOP_PRECH==1)
-    {
-        REL4_OFF
-        RelayPRCH = 0;
-        REL7_OFF
-        RelayAC = 0;
-        stan_pracy=ReadyToGo;
-        if(UDC>20)
-            {
-                REL6_ON
-                RelayDC = 1;
-            }
-        else
-        {
-            REL6_OFF
-            RelayDC = 0;
-        }
-    }
-
     if(STOP_PROC==1 || UDC<30 ){
         Urefd = UDCon*0.1;
         /*if (abs(UDC-Urefd*10)<5.0){
@@ -374,8 +353,9 @@ __interrupt void epwm1ISR(void)
             RelayAC = 0;
         }*/
 
-        REL7_OFF
+        REL2_OFF
         RelayAC = 0;
+
 
         StartPWM = 0;
         integral2 = 0;
@@ -401,20 +381,20 @@ __interrupt void epwm1ISR(void)
         //flagastopu_m=1;
         if(UDC<20)
             {
-            REL6_OFF
-            RelayDC = 0;
+                REL6_OFF
+                RelayDC = 0;
             }
-        }
-    warunek=((STOP_PRECH==1 && STOP_PROC==1) || Fault==1 || ((stan_pracy<TurnOnVoltageMode) && (UDC>3*UDCon)) || stan_pracy==ReadyToGo || ((RelayAC==1) && (UDC<UDCon)) || TurnOffInverter==1);
+    }
+warunek=((STOP_PRECH==1 && STOP_PROC==1) || Fault==1 || ((stan_pracy<TurnOnVoltageMode) && (UDC>3*UDCon)) || stan_pracy==ReadyToGo || ((RelayAC==1) && (UDC<UDCon)) || TurnOffInverter==1);
 
-    //warunek=0;
+warunek=0;
     if(warunek==1)
         {
         TurnOffInverter=0;
         warunek=0;
         REL4_OFF
         RelayPRCH = 0;
-        REL7_OFF
+        REL2_OFF
         RelayAC = 0;
         StartPWM=0;
         flagaON = 0;
@@ -459,7 +439,7 @@ __interrupt void epwm1ISR(void)
     case AcRelayOn:
             if(UDC>UDCon && START_PROC==1 && RelayDC==0 && RelayAC==0 && RelayPRCH==1)
             {
-                REL7_ON
+                REL2_ON
                 RelayAC=1;
                 REL4_OFF
                 RelayPRCH = 0;
@@ -471,7 +451,7 @@ __interrupt void epwm1ISR(void)
             }
             else
             {
-                REL7_OFF
+                REL2_OFF
                 RelayAC=0;
                 timer=0;
             }
@@ -572,8 +552,7 @@ __interrupt void epwm1ISR(void)
     alfabetatodq(Ia, Ib, &Id, &Iq, theta2);
 
     //PLL synchronizacja z sieci¹
-    //pll(&theta, Uq, omega, Kp_pll, Ki_pll, Ts);
-    pll(&theta, Uq, omega, 3.85, 611.85, Ts);
+    pll(&theta, Uq, omega, Kp_pll, Ki_pll, Ts);
     // Odwrocenie k¹ta
     theta2=2*PI-theta;
 
@@ -619,8 +598,6 @@ __interrupt void epwm1ISR(void)
         }
         wspdt = kp4*0.01;
         break;
-    case 15:
-        testModeOn = kp4;
     case 20:
         kpU = kp4;
         tiU = ti3;
@@ -639,7 +616,7 @@ __interrupt void epwm1ISR(void)
 
          if (startreg == 1.0){//Tryb pr¹dowy - chyba napiêciowy? (MH)
              UDCramp=rampaPRCH(UDC,UDCramp,Urefd*10,RelayPRCH);  // Rampa napiêciowa
-             regulatorPI(&Idramp,&integral3,UDC,UDCramp,10,0,0.02*kpU,0.005*tiU,Ts);  // Regulator napiêcia
+             regulatorPI(&Idramp,&integral3,-UDCramp,-UDC,10,0,0.02*kpU,0.005*tiU,Ts);  // Regulator napiêcia
          }
          else{ //Tryb napiêciowy - chyba pr¹dowy? (MH)
              //  Rampa do zadawania pr¹du
@@ -661,38 +638,26 @@ __interrupt void epwm1ISR(void)
          Udout=Ud1+Ud-omegaL*Iq;
          Uqout=Uq1+Uq+omegaL*Id;
 
-         if (testModeOn == 1){
-
-             Udout = Udtestvalue;
-             Uqout = Uqtestvalue;
-         }
-         else{
-             filter(&Udtestvalue,&Udtestvalue_old,0.001,Udout);
-             filter(&Uqtestvalue,&Uqtestvalue_old,0.001,Uqout);
-         }
-
-
          // Transformacje odwrotnie dq->alfabeta->abc
          dqtoalfabeta(&Ualfaout, &Ubetaout, Udout, Uqout,theta2);
          dqtoalfabeta(&Ialfaref,&Ibetaref, -Idramp, 0, theta2);
 
+         // Proportional Resonant Controller
+         Kp_RC = kp3;
+         RC_exec(&rc_init_a3,Ialfaref-Ia,res_mx3);
+         RC_exec(&rc_init_a5,Ialfaref-Ia,res_mx5);
+         RC_exec(&rc_init_a7,Ialfaref-Ia,res_mx7);
+         RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
+         Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01 + rc_init_a11.y_res01;
 
+         RC_exec(&rc_init_b3,Ibetaref-Ib,res_mx3);
+         RC_exec(&rc_init_b5,Ibetaref-Ib,res_mx5);
+         RC_exec(&rc_init_b7,Ibetaref-Ib,res_mx7);
+         RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
+         Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01 + rc_init_b11.y_res01;
 
          if(res_on==1)
-         {//dodanie rezonansowych
-             // Proportional Resonant Controller
-             Kp_RC = kp3;//
-             RC_exec(&rc_init_a3,Ialfaref-Ia,res_mx3);
-             RC_exec(&rc_init_a5,Ialfaref-Ia,res_mx5);
-             RC_exec(&rc_init_a7,Ialfaref-Ia,res_mx7);
-             RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
-             Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01 + rc_init_a11.y_res01;
-
-             RC_exec(&rc_init_b3,Ibetaref-Ib,res_mx3);
-             RC_exec(&rc_init_b5,Ibetaref-Ib,res_mx5);
-             RC_exec(&rc_init_b7,Ibetaref-Ib,res_mx7);
-             RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
-             Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01 + rc_init_b11.y_res01;
+         {
              alfabetatoabc(Ualfaout+Ialfa_out, Ubetaout+Ibeta_out, &Duty1r,&Duty2r,&Duty3r);
          }
          else if (res_on==0)
@@ -702,8 +667,6 @@ __interrupt void epwm1ISR(void)
          else TurnOffInverter=1;
 
          //alfabetatoabc(Ualfaout, Ubetaout, &Duty1r,&Duty2r,&Duty3r);  //wy³¹czony rezonansowy
-
-
 
          if(UDC1>0.0 & UDC2>0.0){
 
@@ -728,8 +691,7 @@ __interrupt void epwm1ISR(void)
              regulatorPI(&Ubal_out, &Ubal_int, 0, Ubal_in, 1, -1, kDC, 0.01 * tDC, Ts);
              //Bal_DCout = Bal_DC(mes.IAC1,mes.IAC2,mes.IAC3,Duty1,Duty2,Duty3);
 
-             Bal_DCout = 1.0;
-             Ubal_out = 0.0;
+             Bal_DCout=1.0;
              //Ubal_out = 0;
 
              Duty1 = Duty1 - (Ubal_out*Bal_DCout);//Bal_DCout);
