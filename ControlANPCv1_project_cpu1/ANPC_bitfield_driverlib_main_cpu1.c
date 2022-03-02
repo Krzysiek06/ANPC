@@ -385,9 +385,9 @@ __interrupt void epwm1ISR(void)
                 RelayDC = 0;
             }
     }
-warunek=((STOP_PRECH==1 && STOP_PROC==1) || Fault==1 || ((stan_pracy<TurnOnVoltageMode) && (UDC>3*UDCon)) || stan_pracy==ReadyToGo || ((RelayAC==1) && (UDC<UDCon)) || TurnOffInverter==1);
+    warunek=((STOP_PRECH==1 && STOP_PROC==1) || Fault==1 || ((stan_pracy<TurnOnVoltageMode) && (UDC>3*UDCon)) || stan_pracy==ReadyToGo || ((RelayAC==1) && (UDC<UDCon)) || TurnOffInverter==1);
 
-warunek=0;
+    warunek=0;
     if(warunek==1)
         {
         TurnOffInverter=0;
