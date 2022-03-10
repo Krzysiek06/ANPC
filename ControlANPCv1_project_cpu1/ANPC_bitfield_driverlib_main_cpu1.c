@@ -7,7 +7,7 @@
 // AUTHORS: Rafa³ Miœkiewicz
 //          Krzysztof Kalinowski
 //
-//
+//test
 // $TI Release: F2838x Support Library v3.04.00.00 $
 // $Release Date: Fri Feb 12 19:08:49 IST 2021 $
 //#############################################################################
@@ -80,7 +80,6 @@ void main(void){
         configureADC(ADCA_BASE);
         configureADC(ADCB_BASE);
         configureADC(ADCD_BASE);
-
        // initADC();
         initEPWM();
         initI2C();
@@ -158,10 +157,11 @@ void main(void){
         rc_init_b11.K = 1.0;
 
         rc_wcut=0.02;
-        rc_ki3=5000;
-        rc_ki5=20000;
-        rc_ki7=20000;
-        rc_ki11=15000;
+        rc_div=10;
+        rc_ki3=5000/rc_div;
+        rc_ki5=20000/rc_div;
+        rc_ki7=20000/rc_div;
+        rc_ki11=15000/rc_div;
 
         RC_init(&rc_init_a3,3,rc_wcut,rc_ki3,Ts);
         RC_init(&rc_init_a5,5,rc_wcut,rc_ki5,Ts);
@@ -174,10 +174,12 @@ void main(void){
         RC_init(&rc_init_b11,11,rc_wcut,rc_ki11,Ts);
         kDC=0.1;
 
-        for (i=0; i<1000; i++){
-            tablicapll[i]=sinf(i*0.00628);
-        }
+        Fir_UI_AC=0.4;
+        Fir_UI_DC=0.2;
 
+        for (i=0; i<1000; i++){
+            tablicapll[i]=0.5*sinf(i*0.00628);
+        }
 
         while(1){
             // Za³czenie Buffora PWM Wentylatorów
@@ -241,8 +243,21 @@ void main(void){
                 writeDataSPI(0, 9, rc_init_b11.y_res01*10+1500);
                 break;
             case 8:
+                if (kp4==1)
+                {
                 writeDataSPI(0, 8, IAC1*10+1500);
                 writeDataSPI(0, 9, UAC1*10+1500);
+                }
+                else if (kp4==2)
+                {
+                writeDataSPI(0, 8, IAC2*10+1500);
+                writeDataSPI(0, 9, UAC2*10+1500);
+                }
+                else if (kp4==3)
+                {
+                writeDataSPI(0, 8, IAC3*10+1500);
+                writeDataSPI(0, 9, UAC3*10+1500);
+                }
                 break;
             case 9:
                 writeDataSPI(0, 8, UDC1mean*10);
@@ -250,22 +265,67 @@ void main(void){
                 break;
 
             case 10:
-                writeDataSPI(0, 8, Duty1*1000+1500);
-                writeDataSPI(0, 9, Duty2*1000+1500);
+                if (kp4==1)
+                {
+                    writeDataSPI(0, 8, Duty1*1000+1500);
+                }
+                else if (kp4==2)
+                {
+                    writeDataSPI(0, 8, Duty2*1000+1500);
+                }
+                else if (kp4==3)
+                {
+                    writeDataSPI(0, 8, Duty3*1000+1500);
+                }
                 break;
 
-            case 13:
-                writeDataSPI(0, 8, Duty1*1000+1500);
-                writeDataSPI(0, 9, Duty2*1000+1500);
-                break;
+            case 11:
+                writeDataSPI(0, 8, Ud1*100);
+                writeDataSPI(0, 9, Uq1*100);
+            break;
 
             case 14:
                 writeDataSPI(0, 8, Duty1*1000+1500);
                 writeDataSPI(0, 9, Duty2*1000+1500);
                 break;
             case 15:
-                writeDataSPI(0, 8, testModeOn*200);
+                writeDataSPI(0, 8, theta2*500);
+
                 break;
+            case 16:
+                if (kp4==1)
+                    {
+                    writeDataSPI(0, 8, sogi_alfa*10+1500);
+                    }
+                else if (kp4==2)
+                {
+                     writeDataSPI(0, 8, sogi_beta*10+1500);
+                }
+                break;
+
+
+            case 19:
+                    writeDataSPI(0, 8, stan_pracy*200);
+
+                    if (kp4==1)
+                    {
+                        writeDataSPI(0, 9, Ud*100);
+                    }
+                    else if (kp4==2)
+                    {
+                        writeDataSPI(0, 9, Ud1*100);
+                    }
+                    else if (kp4==3)
+                    {
+                        writeDataSPI(0, 9, Udout*100);
+                    }
+                    else if (kp4==4)
+                    {
+                        writeDataSPI(0, 9, integral1*100);
+                    }
+                    break;
+
+
             case 20:
                 writeDataSPI(0, 8, Idramp*10+1500);
                 writeDataSPI(0, 9, (UDC-UDCramp)*10+1500);
@@ -329,10 +389,400 @@ __interrupt void epwm1ISR(void)
 {
     LED4_ON;
 
+
+
+    EN_PWM_GROUP1_ON;
+    EN_PWM_GROUP2_ON;
+    EN_PWM_GROUP3_ON;
+    ENABLE1_ON;
+    ENABLE2_ON;
+    ENABLE3_ON;
+
+    //Duty1=kp2;
+    if (j>999) j=0;
+    Duty1 = tablicapll[j];
+    j++;
+
+             //Modulator SPWM wersja a
+              //Pierwsza GALZ
+             if(Duty1>(DT)){
+
+                 if(Latch2<=1){
+                     EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm1Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     Latch2=Latch2+1;
+                 }
+
+                 if(Latch2==2){
+                     if(Duty1<DT){
+                         EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                         EPwm1Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     }
+                     if(Duty1>=DT && Duty1<=(1.0-DT)){
+                         EPwm1Regs.CMPA.bit.CMPA=(Duty1-DT)*EPWM1_TIMER_TBPRD;
+                         EPwm1Regs.CMPB.bit.CMPB=(Duty1+DT)*EPWM1_TIMER_TBPRD;
+                     }
+                     if(Duty1>(1.0-DT)){
+                         EPwm1Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                         EPwm1Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                     }
+                 }
+                 EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                 EPwm2Regs.CMPB.bit.CMPB=1.0*EPWM2_TIMER_TBPRD;
+
+                 EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                 EPwm3Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+
+                  //EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                  //EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                  //Duty1f = 1;
+             }
+             if(Duty1<(DT) && Duty1>(-1*(DT))){
+
+                 EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm1Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+                 EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                 EPwm2Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                 EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                 EPwm3Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+                 Latch1=0;
+                 Latch2=0;
+
+             }
+
+             if(Duty1<(-1*(DT))){
+
+                 if(Latch1<=1){
+
+                     EPwm3Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm3Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     Latch1=Latch1+1;
+                 }
+                 EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm1Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 if(Latch1==2){
+                     if((-1*Duty1)<DT){
+                         EPwm3Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                         EPwm3Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     }
+                     if((-1*Duty1)>=DT && (-1*Duty1)<=(1.0-DT)){
+                         EPwm3Regs.CMPA.bit.CMPA=((-1*Duty1)-DT)*EPWM1_TIMER_TBPRD;
+                         EPwm3Regs.CMPB.bit.CMPB=((-1*Duty1)+DT)*EPWM1_TIMER_TBPRD;
+                     }
+                     if((-1*Duty1)>(1.0-DT)){
+                         EPwm3Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                         EPwm3Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                     }
+                 }
+                 EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+                 EPwm2Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+
+             }
+
+            //Druga GALZ
+             if(Duty2>(DT)){
+
+                 if(Latch3<=1){
+                     EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm4Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     Latch3=Latch3+1;
+                 }
+
+                 if(Latch3==2){
+                     if(Duty2<DT){
+                         EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                         EPwm4Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     }
+                     if(Duty2>=DT && Duty2<=(1.0-DT)){
+                         EPwm4Regs.CMPA.bit.CMPA=(Duty2-DT)*EPWM1_TIMER_TBPRD;
+                         EPwm4Regs.CMPB.bit.CMPB=(Duty2+DT)*EPWM1_TIMER_TBPRD;
+                     }
+                     if(Duty2>(1.0-DT)){
+                         EPwm4Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                         EPwm4Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                     }
+                 }
+                 EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                 EPwm5Regs.CMPB.bit.CMPB=1.0*EPWM2_TIMER_TBPRD;
+
+                 EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                 EPwm6Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+
+                  //EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                  //EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                  //Duty1f = 1;
+             }
+             if(Duty2<(DT) && Duty2>(-1*(DT))){
+
+                 EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm4Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+                 EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                 EPwm5Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                 EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                 EPwm6Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+                 Latch3=0;
+                 Latch4=0;
+
+             }
+
+             if(Duty2<(-1*(DT))){
+
+                 if(Latch4<=1){
+
+                     EPwm6Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm6Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     Latch4=Latch4+1;
+                 }
+                 EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm4Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 if(Latch4==2){
+                     if((-1*Duty2)<DT){
+                         EPwm6Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                         EPwm6Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     }
+                     if((-1*Duty2)>=DT && (-1*Duty2)<=(1.0-DT)){
+                         EPwm6Regs.CMPA.bit.CMPA=((-1*Duty2)-DT)*EPWM1_TIMER_TBPRD;
+                         EPwm6Regs.CMPB.bit.CMPB=((-1*Duty2)+DT)*EPWM1_TIMER_TBPRD;
+                     }
+                     if((-1*Duty2)>(1.0-DT)){
+                         EPwm6Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                         EPwm6Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                     }
+                 }
+                 EPwm5Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+                 EPwm5Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+             }
+
+
+
+              //Trzecia GALZ
+             if(Duty3>(DT)){
+
+                 if(Latch5<=1){
+                     EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm7Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     Latch5=Latch5+1;
+                 }
+
+                 if(Latch5==2){
+                     if(Duty3<DT){
+                         EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                         EPwm7Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     }
+                     if(Duty3>=DT && Duty3<=(1.0-DT)){
+                         EPwm7Regs.CMPA.bit.CMPA=(Duty3-DT)*EPWM1_TIMER_TBPRD;
+                         EPwm7Regs.CMPB.bit.CMPB=(Duty3+DT)*EPWM1_TIMER_TBPRD;
+                     }
+                     if(Duty3>(1.0-DT)){
+                         EPwm7Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                         EPwm7Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                     }
+                 }
+                 EPwm8Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                 EPwm8Regs.CMPB.bit.CMPB=1.0*EPWM2_TIMER_TBPRD;
+
+                 EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                 EPwm9Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+
+
+             }
+             if(Duty3<(DT) && Duty3>(-1*(DT))){
+
+                 EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm7Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+                 EPwm8Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                 EPwm8Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                 EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                 EPwm9Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+                 Latch5=0;
+                 Latch6=0;
+
+             }
+
+             if(Duty3<(-1*(DT))){
+
+                 if(Latch6<=1){
+
+                     EPwm9Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm9Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     Latch6=Latch6+1;
+                 }
+                 EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm7Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 if(Latch6==2){
+                     if((-1*Duty3)<DT){
+                         EPwm9Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                         EPwm9Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                     }
+                     if((-1*Duty3)>=DT && (-1*Duty3)<=(1.0-DT)){
+                         EPwm9Regs.CMPA.bit.CMPA=((-1*Duty3)-DT)*EPWM1_TIMER_TBPRD;
+                         EPwm9Regs.CMPB.bit.CMPB=((-1*Duty3)+DT)*EPWM1_TIMER_TBPRD;
+                     }
+                     if((-1*Duty3)>(1.0-DT)){
+                         EPwm9Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                         EPwm9Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                     }
+                 }
+                 EPwm8Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+                 EPwm8Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+             }
+
+
+
+/*
+             //Modulator SPWM wersja C
+             // Galaz Pierwsza
+                      if(Duty1>(DT)){
+
+                          EPwm1Regs.CMPA.bit.CMPA=(Duty1-DT)*EPWM1_TIMER_TBPRD;
+                          EPwm1Regs.CMPB.bit.CMPB=(Duty1+DT)*EPWM1_TIMER_TBPRD;
+
+                          EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                          EPwm2Regs.CMPB.bit.CMPB=(Duty1+DT)*EPWM2_TIMER_TBPRD;
+
+                          EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                          EPwm3Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+
+
+                      }
+                      if(Duty1<=(DT) && Duty1>=(-1*(DT))){
+
+                          EPwm2Regs.AQCTLA.bit.ZRO=AQ_SET;
+                          EPwm2Regs.AQCTLA.bit.CAU=AQ_CLEAR;
+                          EPwm2Regs.AQCTLA.bit.CAD=AQ_SET;
+
+                          EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                          EPwm1Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+                          EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                          EPwm2Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                          EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                          EPwm3Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+
+                      }
+
+
+                      if(Duty1<(-1*(DT))){
+
+                          EPwm2Regs.AQCTLA.bit.ZRO=AQ_CLEAR;
+                          EPwm2Regs.AQCTLA.bit.CAU=AQ_SET;
+                          EPwm2Regs.AQCTLA.bit.CAD=AQ_CLEAR;
+
+                          EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+                          EPwm1Regs.CMPB.bit.CMPB=0.0*EPWM1_TIMER_TBPRD;
+
+                          EPwm2Regs.CMPA.bit.CMPA=((-Duty1+DT))*EPWM2_TIMER_TBPRD;
+                          EPwm2Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                          EPwm3Regs.CMPA.bit.CMPA=((-Duty1-DT))*EPWM3_TIMER_TBPRD;
+                          EPwm3Regs.CMPB.bit.CMPB=((-Duty1+DT))*EPWM3_TIMER_TBPRD;
+                      }
+
+
+                      // Galaz druga
+                      if(Duty2>(DT)){
+                          EPwm4Regs.CMPA.bit.CMPA=(Duty2-DT)*EPWM1_TIMER_TBPRD;
+                          EPwm4Regs.CMPB.bit.CMPB=(Duty2+DT)*EPWM1_TIMER_TBPRD;
+
+                          EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                          EPwm5Regs.CMPB.bit.CMPB=(Duty2+DT)*EPWM2_TIMER_TBPRD;
+
+                          EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                          EPwm6Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+                      }
+                      if(Duty2<=(DT) && Duty2>=(-1*(DT))){
+
+                          EPwm5Regs.AQCTLA.bit.ZRO=AQ_SET;
+                          EPwm5Regs.AQCTLA.bit.CAU=AQ_CLEAR;
+                          EPwm5Regs.AQCTLA.bit.CAD=AQ_SET;
+
+                          EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                          EPwm4Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+                          EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                          EPwm5Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                          EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                          EPwm6Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+
+                       }
+                       if(Duty2<(-1*(DT))){
+
+                          EPwm5Regs.AQCTLA.bit.ZRO=AQ_CLEAR;
+                          EPwm5Regs.AQCTLA.bit.CAU=AQ_SET;
+                          EPwm5Regs.AQCTLA.bit.CAD=AQ_CLEAR;
+
+                          EPwm4Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+                          EPwm4Regs.CMPB.bit.CMPB=0.0*EPWM1_TIMER_TBPRD;
+
+                          EPwm5Regs.CMPA.bit.CMPA=((-Duty2+DT))*EPWM2_TIMER_TBPRD;
+                          EPwm5Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                          EPwm6Regs.CMPA.bit.CMPA=((-Duty2-DT))*EPWM3_TIMER_TBPRD;
+                          EPwm6Regs.CMPB.bit.CMPB=((-Duty2+DT))*EPWM3_TIMER_TBPRD;
+                       }
+
+
+
+                       // Galaz trzecia
+                       if(Duty3>(DT)){
+                           EPwm7Regs.CMPA.bit.CMPA=(Duty3-DT)*EPWM1_TIMER_TBPRD;
+                           EPwm7Regs.CMPB.bit.CMPB=(Duty3+DT)*EPWM1_TIMER_TBPRD;
+
+                           EPwm8Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                           EPwm8Regs.CMPB.bit.CMPB=(Duty3+DT)*EPWM2_TIMER_TBPRD;
+
+                           EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                           EPwm9Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+                       }
+                       if(Duty3<=(DT) && Duty3>=(-1*(DT))){
+
+                           EPwm8Regs.AQCTLA.bit.ZRO=AQ_SET;
+                           EPwm8Regs.AQCTLA.bit.CAU=AQ_CLEAR;
+                           EPwm8Regs.AQCTLA.bit.CAD=AQ_SET;
+
+                           EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                           EPwm7Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+                           EPwm8Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+                           EPwm8Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                           EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+                           EPwm9Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+
+                        }
+                        if(Duty3<(-1*(DT))){
+
+                           EPwm8Regs.AQCTLA.bit.ZRO=AQ_CLEAR;
+                           EPwm8Regs.AQCTLA.bit.CAU=AQ_SET;
+                           EPwm8Regs.AQCTLA.bit.CAD=AQ_CLEAR;
+
+                           EPwm7Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+                           EPwm7Regs.CMPB.bit.CMPB=0.0*EPWM1_TIMER_TBPRD;
+
+                           EPwm8Regs.CMPA.bit.CMPA=((-Duty3+DT))*EPWM2_TIMER_TBPRD;
+                           EPwm8Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+                           EPwm9Regs.CMPA.bit.CMPA=((-Duty3-DT))*EPWM3_TIMER_TBPRD;
+                           EPwm9Regs.CMPB.bit.CMPB=((-Duty3+DT))*EPWM3_TIMER_TBPRD;
+                        }
+*/
+
+
     pomiary();      //Zebranie wartoœci pomiarów z przetworników A/D 16bit single
     zabezpieczenia(); //Sprawdzenie zabezpieczeñ (Nadpr¹dowe, Wysokie napiêcie) obs³uga desatu
 
-    Fir_UI_AC=0.4;
+    //Fir_UI_AC=0.4;
     filter(&IAC1,&IAC1_old,Fir_UI_AC,mes.IAC1);
     filter(&IAC2,&IAC2_old,Fir_UI_AC,mes.IAC2);
     filter(&IAC3,&IAC3_old,Fir_UI_AC,mes.IAC3);
@@ -341,7 +791,7 @@ __interrupt void epwm1ISR(void)
     filter(&UAC3,&UAC3_old,Fir_UI_AC,mes.UAC3);
 
 
-    Fir_UI_DC=0.2;
+    //Fir_UI_DC=0.2;
     filter(&UDC1,&UDC1_old,Fir_UI_DC,mes.UDC1);
     filter(&UDC2,&UDC2_old,Fir_UI_DC,mes.UDC2p);
 
@@ -350,44 +800,10 @@ __interrupt void epwm1ISR(void)
 
     UDC=(UDC1+UDC2);
     Rinit=220;
-    Iinit=5.4*(-Ud)/Rinit;
+    //Iinit=5.4*Ud/Rinit;
+    Iinit=Irefd;
 
-    if (j>999) j=0;
-    Duty1 = tablicapll[j];
-    if(Duty1>=0.0){
-         EPwm1Regs.CMPA.bit.CMPA=Duty1*EPWM1_TIMER_TBPRD;
-         EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
-         EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
-         //Duty1f = 1;
-    }
-    if(Duty1<0.0){
-        EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
-        EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
-        EPwm3Regs.CMPA.bit.CMPA=-1.0*Duty1*EPWM3_TIMER_TBPRD;
-        //Duty1f = 0;
-    }
-    j=j+1;
-
-    if(STOP_PRECH==1)
-    {
-        REL4_OFF
-        RelayPRCH = 0;
-        REL7_OFF
-        RelayAC = 0;
-        stan_pracy=ReadyToGo;
-        if(UDC>20)
-            {
-                REL6_ON
-                RelayDC = 1;
-            }
-        else
-        {
-            REL6_OFF
-            RelayDC = 0;
-        }
-    }
-
-    if(STOP_PROC==1 || UDC<30 ){
+    if(STOP_PROC==1 && STOP_PRECH==1){// || UDC<30){
         Urefd = UDCon*0.1;
         /*if (abs(UDC-Urefd*10)<5.0){
             StartPWM = 0;
@@ -397,11 +813,13 @@ __interrupt void epwm1ISR(void)
         REL7_OFF
         RelayAC = 0;
 
+
         StartPWM = 0;
         integral2 = 0;
         integral3 = 0;
         Ubal_int = 0;
-        Ud1 = 2*(-Ud);
+        //Ud1 = 2*(-Ud);
+        Ud1=0;
         integral1 = Ud1;
         Uq1 = 0;
         Idramp = 0.0;
@@ -410,25 +828,47 @@ __interrupt void epwm1ISR(void)
         flagaprocedura = 0;
 
 
-       if (stan_pracy>AcRelayOn)
+
+        REL4_OFF
+        RelayPRCH = 0;
+        REL6_OFF
+        RelayDC=0;
+
+       /*if (stan_pracy>AcRelayOn)
         {
             stan_pracy=ReadyToGo;
             REL4_OFF
             RelayPRCH = 0;
 
-        }
+        }*/
        // stan_pracy=ReadyToGo;
         //flagastopu_m=1;
-        if(UDC<20)
+        /*if(UDC<20)
             {
-            REL6_OFF
-            RelayDC = 0;
-            }
-        }
-    warunek=((STOP_PRECH==1 && STOP_PROC==1) || Fault==1 || ((stan_pracy<TurnOnVoltageMode) && (UDC>3*UDCon)) || stan_pracy==ReadyToGo || ((RelayAC==1) && (UDC<UDCon)) || TurnOffInverter==1);
+                REL6_OFF
+                RelayDC = 0;
+            }*/
+    }
 
-    //warunek=0;
-    if(warunek==1)
+    //////// TESTOWE /////
+    if (START_PRECH==1 && STOP_PRECH==0){
+        REL7_ON
+        RelayAC = 1;
+        REL6_ON
+        RelayDC = 1;
+    }
+    if (START_PROC==1 && STOP_PROC==0){
+        StartPWM = 1;
+    }
+    if (START_PROC==0 && STOP_PROC==1){
+        StartPWM = 0;
+        integral1 = 0;
+    }
+
+    //warunek=((STOP_PRECH==1 && STOP_PROC==1) || Fault==1 || ((stan_pracy<TurnOnVoltageMode) && (UDC>3*UDCon)) || stan_pracy==ReadyToGo || ((RelayAC==1) && (UDC<UDCon)) || TurnOffInverter==1);
+
+   warunek=0;
+   if(warunek==1)
         {
         TurnOffInverter=0;
         warunek=0;
@@ -450,10 +890,9 @@ __interrupt void epwm1ISR(void)
 
     }
 
-    UDCon = 1.6 * (-Ud);
+    UDCon = 1.6 * (Ud);
 
-
-
+/*
     switch (stan_pracy)
     {
     case ReadyToGo:
@@ -461,14 +900,10 @@ __interrupt void epwm1ISR(void)
             {
                 stan_pracy=ReadyToPreCharge;
             }
-
-
-
             break;
 
-
     case ReadyToPreCharge:
-            if(-Ud>20 && RelayAC==0 && RelayDC==0 && RelayPRCH == 0 && START_PROC==0 && START_PRECH==1)
+            if(Ud>0 && RelayAC==0 && RelayDC==0 && RelayPRCH == 0 && START_PROC==0 && START_PRECH==1)
             {
                 REL4_ON
                 RelayPRCH=1;
@@ -479,9 +914,9 @@ __interrupt void epwm1ISR(void)
                 REL4_OFF
                 RelayPRCH=0;
             }
-
-
+            op=0;
             break;
+
     case AcRelayOn:
             if(UDC>UDCon && START_PROC==1 && RelayDC==0 && RelayAC==0 && RelayPRCH==1)
             {
@@ -508,7 +943,9 @@ __interrupt void epwm1ISR(void)
             }
             break;
     case CurrentMode:
-            Ud1 = 2*(-Ud);
+            //Ud1 = 2*(-Ud);
+            Ud1=0;
+          //  Ud1 = 2*Ud;
             integral1 = Ud1;
             StartPWM=1;
             startreg=0;//tryb pr¹dowy??
@@ -534,7 +971,7 @@ __interrupt void epwm1ISR(void)
             if(timer>0.02)
             {
                 timer=0;
-                stan_pracy=TurnOnVoltageMode;
+                //stan_pracy=TurnOnVoltageMode;
                 UDCramp = UDC;
                 //integral3 = Idramp;
             }
@@ -545,12 +982,10 @@ __interrupt void epwm1ISR(void)
     default:
         stan_pracy=ReadyToGo;
         break;
+    }*/
 
 
-    }
-
-
-    if (IAC1 > IAC1max) IAC1max = IAC1;
+    /*if (IAC1 > IAC1max) IAC1max = IAC1;
     if (IAC2 > IAC2max) IAC2max = IAC2;
     if (IAC3 > IAC3max) IAC3max = IAC3;
 
@@ -577,16 +1012,18 @@ __interrupt void epwm1ISR(void)
 
         timerscal = 0;
     }
-    timerscal = timerscal + Ts;
+    timerscal = timerscal + Ts;*/
 
 
     //Transformcje ABC do alfa beta
     abctoalfabeta(&Ua, &Ub, UAC1, UAC2 , UAC3);
 
     //SOGI -PLL
-    ss_alfa.v_in = Ub;
+    //ss_alfa.v_in = Ub;
+    ss_alfa.v_in = Ua;
     sogi_exec(&ss_alfa);
-    ss_beta.v_in = Ua;
+    //ss_beta.v_in = Ua;
+    ss_beta.v_in = Ub;
     sogi_exec(&ss_beta);
     sogi_alfa = 0.5 * (ss_alfa.v_out-ss_beta.q_out);
     sogi_beta = 0.5 * (ss_alfa.q_out+ss_beta.v_out);
@@ -594,14 +1031,15 @@ __interrupt void epwm1ISR(void)
     abctoalfabeta(&Ia, &Ib, IAC1, IAC2 , IAC3);
 
     //Transformcje alfa beta do dq
-    alfabetatodq(sogi_beta, sogi_alfa, &Ud, &Uq, theta2);
+    //alfabetatodq(sogi_beta, sogi_alfa, &Ud, &Uq, theta2);
+    alfabetatodq(sogi_alfa, sogi_beta, &Ud, &Uq, theta2);
     alfabetatodq(Ia, Ib, &Id, &Iq, theta2);
 
     //PLL synchronizacja z sieci¹
-    //pll(&theta, Uq, omega, Kp_pll, Ki_pll, Ts);
-    pll(&theta, Uq, omega, 3.85, 611.85, Ts);
+    pll(&theta, Uq, omega, Kp_pll, Ki_pll, Ts);
     // Odwrocenie k¹ta
-    theta2=2*PI-theta;
+    //theta2=2*PI-theta;
+    theta2=theta;
 
     // Wyswietlanie adc
     zmiana_wyswietl = ti4;
@@ -614,16 +1052,24 @@ __interrupt void epwm1ISR(void)
         pomfilter = kp4;
         break;
     case 4:
-        res_mx3 = kp4;
+       // res_mx3 = kp4;
+        rc_init_a3.K = kp4;
+        rc_init_b3.K = kp4;
          break;
     case 5:
-        res_mx5 = kp4;
+        //res_mx5 = kp4;
+        rc_init_a5.K = kp4;
+        rc_init_b5.K = kp4;
         break;
     case 6:
-        res_mx7 = kp4;
+        //res_mx7 = kp4;
+        rc_init_a7.K = kp4;
+        rc_init_b7.K = kp4;
         break;
     case 7:
-        res_mx11 = kp4;
+       // res_mx11 = kp4;
+        rc_init_a11.K = kp4;
+        rc_init_b11.K = kp4;
         break;
 
     case 12:
@@ -637,16 +1083,19 @@ __interrupt void epwm1ISR(void)
         }
 
         break;
-    case 14:
-        if(stan_pracy<AcRelayOn)
-        {
-            //wspdt = kp4*0.01;
 
-        }
+    case 14:
         wspdt = kp4*0.01;
         break;
-    case 15:
-        testModeOn = kp4;
+
+    case 16:
+        op = kp4;
+        break;
+
+    case 17:
+        bal = kp4;
+        break;
+
     case 20:
         kpU = kp4;
         tiU = ti3;
@@ -662,74 +1111,73 @@ __interrupt void epwm1ISR(void)
          ENABLE1_ON;
          ENABLE2_ON;
          ENABLE3_ON;
-
-         if (startreg == 1.0){//Tryb pr¹dowy - chyba napiêciowy? (MH)
-             UDCramp=rampaPRCH(UDC,UDCramp,Urefd*10,RelayPRCH);  // Rampa napiêciowa
-             regulatorPI(&Idramp,&integral3,UDC,UDCramp,10,0,0.02*kpU,0.005*tiU,Ts);  // Regulator napiêcia
-         }
-         else{ //Tryb napiêciowy - chyba pr¹dowy? (MH)
-             //  Rampa do zadawania pr¹du
-             if ( Idramp <= Iinit){
-                 Idramp = Idramp + 0.001;
+         if(op!=1)
+         {
+             if (startreg == 1.0){//Tryb napiêciowy
+                 UDCramp=rampaPRCH(UDC,UDCramp,Urefd*10,RelayPRCH);  // Rampa napiêciowa
+                 regulatorPI(&Idramp,&integral3,-UDCramp,-UDC,10,0,0.02*kpU,0.005*tiU,Ts);  // Regulator napiêcia
              }
-             if ( Idramp >= Iinit){
-                 Idramp = Idramp - 0.001;
+             else{ //Tryb  pr¹dowy
+                 //  Rampa do zadawania pr¹du
+                 if ( Idramp <= Iinit){
+                     Idramp = Idramp + 0.001;
+                 }
+                 if ( Idramp >= Iinit){
+                     Idramp = Idramp - 0.001;
+                 }
+                integral3 = Irefd;  //wartosc poczatkowa calki do regulatora napieciiowego
              }
-            integral3 = Irefd;  //wartosc poczatkowa calki do regulatora napieciiowego
-         }
 
-         kpreg = kp1;
-         tireg = ti1;
+             kpreg = kp1;
+             tireg = ti1;
 
-         regulatorPI(&Ud1, &integral1, Id, -Idramp, 660.0, -660.0, kpreg, tireg*0.01, Ts);   //Regulator pradu w osi d
-         regulatorPI(&Uq1, &integral2, Iq, 0, 300.0, -300.0, kpreg, tireg*0.01, Ts);        //Regulator pradu w osi q
+             //integral1=0;
+             regulatorPI(&Ud1, &integral1, Id, Idramp, 30, -30, kpreg, tireg*0.01, Ts);   //Regulator pradu w osi d
+             //integral1=0;
 
-         Udout=Ud1+Ud-omegaL*Iq;
-         Uqout=Uq1+Uq+omegaL*Id;
+             //integral2=0;
+             regulatorPI(&Uq1, &integral2, Iq, 0, 5, -5, kpreg, tireg*0.01, Ts);        //Regulator pradu w osi q
+             //integral2=0;
+             Udout=-Ud1-Ud-omegaL*Iq;
+             Uqout=-Uq1-Uq+omegaL*Id;
 
-         if (testModeOn == 1){
+             // Transformacje odwrotnie dq->alfabeta->abc
+             dqtoalfabeta(&Ualfaout, &Ubetaout, Udout, Uqout,theta2);
+             dqtoalfabeta(&Ialfaref,&Ibetaref, Idramp, 0, theta2);
 
-             Udout = Udtestvalue;
-             Uqout = Uqtestvalue;
-         }
-         else{
-             filter(&Udtestvalue,&Udtestvalue_old,0.001,Udout);
-             filter(&Uqtestvalue,&Uqtestvalue_old,0.001,Uqout);
-         }
-
-
-         // Transformacje odwrotnie dq->alfabeta->abc
-         dqtoalfabeta(&Ualfaout, &Ubetaout, Udout, Uqout,theta2);
-         dqtoalfabeta(&Ialfaref,&Ibetaref, -Idramp, 0, theta2);
-
-
-
-         if(res_on==1)
-         {//dodanie rezonansowych
              // Proportional Resonant Controller
-             Kp_RC = kp3;//
+             Kp_RC = kp3;
              RC_exec(&rc_init_a3,Ialfaref-Ia,res_mx3);
              RC_exec(&rc_init_a5,Ialfaref-Ia,res_mx5);
              RC_exec(&rc_init_a7,Ialfaref-Ia,res_mx7);
-             RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
-             Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01 + rc_init_a11.y_res01;
+             //RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
+             Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01;
+             //+ rc_init_a11.y_res01
 
              RC_exec(&rc_init_b3,Ibetaref-Ib,res_mx3);
              RC_exec(&rc_init_b5,Ibetaref-Ib,res_mx5);
              RC_exec(&rc_init_b7,Ibetaref-Ib,res_mx7);
-             RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
-             Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01 + rc_init_b11.y_res01;
-             alfabetatoabc(Ualfaout+Ialfa_out, Ubetaout+Ibeta_out, &Duty1r,&Duty2r,&Duty3r);
+             //RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
+             Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01;
+             // + rc_init_b11.y_res01
+             if(res_on==1)
+             {
+                 Ualfaout=Ualfaout+Ialfa_out;
+                 Ubetaout=Ubetaout+Ibeta_out;
+             }
+             UDC_op=UDC;
+             Udout_op=Udout;
+             Uqout_op=Uqout;
          }
-         else if (res_on==0)
+
+         if (op==1)
          {
-             alfabetatoabc(Ualfaout, Ubetaout, &Duty1r,&Duty2r,&Duty3r);  //wy³¹czony rezonansowy
+             UDC=UDC_op;
+             Udout=Udout_op;
+             Uqout=Uqout_op;
+             dqtoalfabeta(&Ualfaout, &Ubetaout, Udout, Uqout,theta2);
          }
-         else TurnOffInverter=1;
-
-         //alfabetatoabc(Ualfaout, Ubetaout, &Duty1r,&Duty2r,&Duty3r);  //wy³¹czony rezonansowy
-
-
+         alfabetatoabc(Ualfaout, Ubetaout, &Duty1r,&Duty2r,&Duty3r);
 
          if(UDC1>0.0 & UDC2>0.0){
 
@@ -754,8 +1202,8 @@ __interrupt void epwm1ISR(void)
              regulatorPI(&Ubal_out, &Ubal_int, 0, Ubal_in, 1, -1, kDC, 0.01 * tDC, Ts);
              //Bal_DCout = Bal_DC(mes.IAC1,mes.IAC2,mes.IAC3,Duty1,Duty2,Duty3);
 
-             Bal_DCout = 1.0;
-             Ubal_out = 0.0;
+             Bal_DCout=1.0;
+             if(bal==0) Bal_DCout=0;
              //Ubal_out = 0;
 
              Duty1 = Duty1 - (Ubal_out*Bal_DCout);//Bal_DCout);
@@ -829,39 +1277,238 @@ __interrupt void epwm1ISR(void)
 
 
          }else{
-             Duty1=0.0;
+             //Duty1=0.0;
              Duty2=0.0;
              Duty3=0.0;
          }
 
-         //Modulator SPWM
-         if(Duty1>=0.0){
-              EPwm1Regs.CMPA.bit.CMPA=Duty1*EPWM1_TIMER_TBPRD;
-              EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
-              EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
-              //Duty1f = 1;
+         //Modulator SPWM wersja A
+         //Pierwsza GALZ
+         /*if(Duty1>(DT)){
+             if(Latch2<=1){
+                 EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm1Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 Latch2=Latch2+1;
+             }
+
+             if(Latch1==2){
+                 if(Duty1<DT){
+                     EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm1Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 }
+                 if(Duty1>=DT && Duty1<=(1.0-DT)){
+                     EPwm1Regs.CMPA.bit.CMPA=(Duty1-DT)*EPWM1_TIMER_TBPRD;
+                     EPwm1Regs.CMPB.bit.CMPB=(Duty1+DT)*EPWM1_TIMER_TBPRD;
+                 }
+                 if(Duty1>(1.0-DT)){
+                     EPwm1Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                     EPwm1Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 }
+             }
+             EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             EPwm2Regs.CMPB.bit.CMPB=1.0*EPWM2_TIMER_TBPRD;
+
+             EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             EPwm3Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+
+             //EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             //EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             //Duty1f = 1;
          }
-         if(Duty1<0.0){
-             EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+         if(Duty1<(DT) && Duty1>(-1*(DT))){
+
+             EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+             EPwm1Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+             EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             EPwm2Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+             EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             EPwm3Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+             Latch1=0;
+             Latch2=0;
+         }
+
+         if(Duty1<(-1*(DT))){
+
+             if(Latch1<=1){
+                 EPwm3Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm3Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 Latch1=Latch1+1;
+             }
+             EPwm1Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+             EPwm1Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+             if(Latch1==2){
+                 if((-1*Duty1)<DT){
+                     EPwm3Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm3Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 }
+                 if((-1*Duty1)>=DT && (-1*Duty1)<=(1.0-DT)){
+                     EPwm3Regs.CMPA.bit.CMPA=((-1*Duty1)-DT)*EPWM1_TIMER_TBPRD;
+                     EPwm3Regs.CMPB.bit.CMPB=((-1*Duty1)+DT)*EPWM1_TIMER_TBPRD;
+                 }
+                 if((-1*Duty1)>(1.0-DT)){
+                     EPwm3Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                     EPwm3Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 }
+             }
              EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
-             EPwm3Regs.CMPA.bit.CMPA=-1.0*Duty1*EPWM3_TIMER_TBPRD;
-             //Duty1f = 0;
+             EPwm2Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
          }
-         /*if(Duty1>=0.0){
-              EPwm1Regs.CMPA.bit.CMPA=Duty1*EPWM1_TIMER_TBPRD;
-              EPwm1Regs.TZCTL.bit.TZB=0x01; //Force TrpiZone PwmB High
-              EPwm2Regs.CMPA.bit.CMPA=(1-Duty1)*EPWM2_TIMER_TBPRD;
-              EPwm2Regs.TZCTL.bit.TZB=0x10; //Force TrpiZone PwmB Low
-              EPwm3Regs.CMPA.bit.CMPA=(1-Duty1)*EPWM3_TIMER_TBPRD;
-              EPwm3Regs.TZCTL.bit.TZB=0x01; //Force TrpiZone PwmB High
-              //Duty1f = 1;
+
+         //Druga GALZ
+         if(Duty2>(DT)){
+
+             if(Latch3<=1){
+                 EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm4Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 Latch3=Latch3+1;
+             }
+
+             if(Latch3==2){
+                 if(Duty2<DT){
+                     EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm4Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 }
+                 if(Duty2>=DT && Duty2<=(1.0-DT)){
+                     EPwm4Regs.CMPA.bit.CMPA=(Duty2-DT)*EPWM1_TIMER_TBPRD;
+                     EPwm4Regs.CMPB.bit.CMPB=(Duty2+DT)*EPWM1_TIMER_TBPRD;
+                 }
+                 if(Duty2>(1.0-DT)){
+                     EPwm4Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                     EPwm4Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 }
+             }
+             EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             EPwm5Regs.CMPB.bit.CMPB=1.0*EPWM2_TIMER_TBPRD;
+
+             EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             EPwm6Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+
+             //EPwm2Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             //EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             //Duty1f = 1;
          }
-         if(Duty1<0.0){
-             EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
-             EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
-             EPwm3Regs.CMPA.bit.CMPA=-1.0*Duty1*EPWM3_TIMER_TBPRD;
-             //Duty1f = 0;
-         }*/
+         if(Duty2<(DT) && Duty2>(-1*(DT))){
+
+             EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+             EPwm4Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+             EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             EPwm5Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+             EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             EPwm6Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+             Latch3=0;
+             Latch4=0;
+
+         }
+
+         if(Duty2<(-1*(DT))){
+             if(Latch4<=1){
+                 EPwm6Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm6Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 Latch4=Latch4+1;
+             }
+             EPwm4Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+             EPwm4Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+             if(Latch4==2){
+                 if((-1*Duty2)<DT){
+                     EPwm6Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm6Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 }
+                 if((-1*Duty2)>=DT && (-1*Duty2)<=(1.0-DT)){
+                     EPwm6Regs.CMPA.bit.CMPA=((-1*Duty2)-DT)*EPWM1_TIMER_TBPRD;
+                     EPwm6Regs.CMPB.bit.CMPB=((-1*Duty2)+DT)*EPWM1_TIMER_TBPRD;
+                 }
+                 if((-1*Duty2)>(1.0-DT)){
+                     EPwm6Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                     EPwm6Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 }
+             }
+             EPwm5Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+             EPwm5Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+         }
+
+
+
+         //Trzecia GALZ
+         if(Duty3>(DT)){
+
+             if(Latch5<=1){
+                 EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm7Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 Latch5=Latch5+1;
+             }
+
+             if(Latch5==2){
+                 if(Duty3<DT){
+                     EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm7Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 }
+                 if(Duty3>=DT && Duty3<=(1.0-DT)){
+                     EPwm7Regs.CMPA.bit.CMPA=(Duty3-DT)*EPWM1_TIMER_TBPRD;
+                     EPwm7Regs.CMPB.bit.CMPB=(Duty3+DT)*EPWM1_TIMER_TBPRD;
+                 }
+                 if(Duty3>(1.0-DT)){
+                     EPwm7Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                     EPwm7Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 }
+             }
+             EPwm8Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             EPwm8Regs.CMPB.bit.CMPB=1.0*EPWM2_TIMER_TBPRD;
+
+             EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             EPwm9Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+
+
+         }
+         if(Duty3<(DT) && Duty3>(-1*(DT))){
+
+             EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+             EPwm7Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+
+             EPwm8Regs.CMPA.bit.CMPA=1.0*EPWM2_TIMER_TBPRD;
+             EPwm8Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+             EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+             EPwm9Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+             Latch5=0;
+             Latch6=0;
+
+         }
+
+         if(Duty3<(-1*(DT))){
+
+             if(Latch6<=1){
+
+                 EPwm9Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                 EPwm9Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 Latch6=Latch6+1;
+             }
+             EPwm7Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+             EPwm7Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+             if(Latch6==2){
+                 if((-1*Duty3)<DT){
+                     EPwm9Regs.CMPA.bit.CMPA=(0.0)*EPWM1_TIMER_TBPRD;
+                     EPwm9Regs.CMPB.bit.CMPB=(0.0)*EPWM1_TIMER_TBPRD;
+                 }
+                 if((-1*Duty3)>=DT && (-1*Duty3)<=(1.0-DT)){
+                     EPwm9Regs.CMPA.bit.CMPA=((-1*Duty3)-DT)*EPWM1_TIMER_TBPRD;
+                     EPwm9Regs.CMPB.bit.CMPB=((-1*Duty3)+DT)*EPWM1_TIMER_TBPRD;
+                 }
+                 if((-1*Duty3)>(1.0-DT)){
+                     EPwm9Regs.CMPA.bit.CMPA=(1.0)*EPWM1_TIMER_TBPRD;
+                     EPwm9Regs.CMPB.bit.CMPB=(1.0)*EPWM1_TIMER_TBPRD;
+                 }
+             }
+             EPwm8Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+             EPwm8Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+
+         }
+
+/*
          if(Duty2>=0.0){
              EPwm4Regs.CMPA.bit.CMPA=Duty2*EPWM4_TIMER_TBPRD;
              EPwm5Regs.CMPA.bit.CMPA=1.0*EPWM5_TIMER_TBPRD;
@@ -882,26 +1529,35 @@ __interrupt void epwm1ISR(void)
              EPwm8Regs.CMPA.bit.CMPA=0.0*EPWM8_TIMER_TBPRD;
              EPwm9Regs.CMPA.bit.CMPA=-1.0*Duty3*EPWM9_TIMER_TBPRD;
          }
-
+*/
 
     }else{
-        EN_PWM_GROUP3_OFF;
-        EN_PWM_GROUP2_OFF;
+        //EN_PWM_GROUP3_OFF;
+        //EN_PWM_GROUP2_OFF;
         //EN_PWM_GROUP1_OFF;
 
         //ENABLE1_OFF;
-        ENABLE2_OFF;
-        ENABLE3_OFF;
-
-        //EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
-       // EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
-        //EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
+        //ENABLE2_OFF;
+        //ENABLE3_OFF;
+/*
+        EPwm1Regs.CMPA.bit.CMPA=0.0*EPWM1_TIMER_TBPRD;
+        EPwm2Regs.CMPA.bit.CMPA=0.0*EPWM2_TIMER_TBPRD;
+        EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
         EPwm4Regs.CMPA.bit.CMPA=0.0*EPWM4_TIMER_TBPRD;
         EPwm5Regs.CMPA.bit.CMPA=0.0*EPWM5_TIMER_TBPRD;
         EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM6_TIMER_TBPRD;
         EPwm7Regs.CMPA.bit.CMPA=0.0*EPWM7_TIMER_TBPRD;
         EPwm8Regs.CMPA.bit.CMPA=0.0*EPWM8_TIMER_TBPRD;
         EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM9_TIMER_TBPRD;
+        EPwm1Regs.CMPB.bit.CMPB=0.0*EPWM1_TIMER_TBPRD;
+        EPwm2Regs.CMPB.bit.CMPB=0.0*EPWM2_TIMER_TBPRD;
+        EPwm3Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
+        EPwm4Regs.CMPB.bit.CMPB=0.0*EPWM4_TIMER_TBPRD;
+        EPwm5Regs.CMPB.bit.CMPB=0.0*EPWM5_TIMER_TBPRD;
+        EPwm6Regs.CMPB.bit.CMPB=0.0*EPWM6_TIMER_TBPRD;
+        EPwm7Regs.CMPB.bit.CMPB=0.0*EPWM7_TIMER_TBPRD;
+        EPwm8Regs.CMPB.bit.CMPB=0.0*EPWM8_TIMER_TBPRD;
+        EPwm9Regs.CMPB.bit.CMPB=0.0*EPWM9_TIMER_TBPRD;*/
     }
 
 
@@ -1379,9 +2035,9 @@ void RC_init(RC_struct *RC_st,float x,float wcut,float Ki,float Ts1){ //Inicjali
 
 void RC_exec(RC_struct *RC_st,float in,float res_k){
     RC_st->u_res01 = in;
-    RC_st->n0=RC_st->n0*res_k;
-    RC_st->n2=RC_st->n2*res_k;
-    RC_st->y_res01 = RC_st->n0 * (RC_st->u_res01) + RC_st->n2 * (RC_st->u_res21) - RC_st->d1 * (RC_st->y_res11) - RC_st->d2 * (RC_st->y_res21);
+    //RC_st->n0=RC_st->n0*res_k;
+    //RC_st->n2=RC_st->n2*res_k;
+    RC_st->y_res01 = RC_st->K * RC_st->n0 * (RC_st->u_res01) + RC_st->K * RC_st->n2 * (RC_st->u_res21) - RC_st->d1 * (RC_st->y_res11) - RC_st->d2 * (RC_st->y_res21);
 
     RC_st->y_res21 = RC_st->y_res11;
     RC_st->y_res11 = RC_st->y_res01;

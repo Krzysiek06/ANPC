@@ -59,8 +59,8 @@ void CANAMsgWrite(void){
     txdata1[3]=(((int) (Iq*10.0+30.0) >>8) & 0xFF);
     txdata1[4]=( (int) (Ud+450) & 0xFF) ;
     txdata1[5]=(((int) (Ud+450) >>8) & 0xFF);
-    txdata1[6]=( (int) (Ud1+450) & 0xFF) ;
-    txdata1[7]=(((int) (Ud1+450) >>8) & 0xFF);
+    txdata1[6]=( (int) (Uq+450) & 0xFF) ;
+    txdata1[7]=(((int) (Uq+450) >>8) & 0xFF);
 
 
    // txdata1[0]=( (int) (temp1*100.0) & 0xFF) ;

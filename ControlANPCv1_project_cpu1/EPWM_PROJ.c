@@ -68,6 +68,11 @@ void initEPWM1(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM1_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+
+
+   EPWM_setCounterCompareShadowLoadMode(EPWM1_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -80,6 +85,7 @@ void initEPWM1(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_A, EPWM1_TIMER_TBPRD);
+    EPWM_setCounterCompareValue(EPWM1_BASE, EPWM_COUNTER_COMPARE_B, EPWM1_TIMER_TBPRD);
 
 
 
@@ -88,11 +94,11 @@ void initEPWM1(void){
     //
     EPWM_setActionQualifierAction(EPWM1_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM1_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM1_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -100,8 +106,27 @@ void initEPWM1(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM1_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
+
+
+    EPWM_setActionQualifierAction(EPWM1_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM1_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM1_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM1_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
+
 /*
     //
     // Set actions
@@ -123,7 +148,7 @@ void initEPWM1(void){
                                       EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 
-*/
+
 
     //
 
@@ -159,7 +184,7 @@ void initEPWM1(void){
     EPWM_setDeadBandOutputSwapMode(EPWM1_BASE, EPWM_DB_OUTPUT_A, true);
     EPWM_setDeadBandOutputSwapMode(EPWM1_BASE, EPWM_DB_OUTPUT_B, true);
 
-
+*/
     //
     // Interrupt where we will change the Compare Values
     // Select INT on Time base counter zero event,
@@ -204,6 +229,9 @@ void initEPWM2(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM2_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+    EPWM_setCounterCompareShadowLoadMode(EPWM2_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -216,6 +244,7 @@ void initEPWM2(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_A, EPWM2_TIMER_TBPRD);
+    EPWM_setCounterCompareValue(EPWM2_BASE, EPWM_COUNTER_COMPARE_B, EPWM2_TIMER_TBPRD);
 
 
 
@@ -224,11 +253,11 @@ void initEPWM2(void){
     //
     EPWM_setActionQualifierAction(EPWM2_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM2_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM2_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -236,12 +265,27 @@ void initEPWM2(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM2_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 
-
+    EPWM_setActionQualifierAction(EPWM2_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM2_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM2_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM2_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
      //
-
+/*
      //
        // Use EPWMA as the input for both RED and FED
        //
@@ -273,7 +317,7 @@ void initEPWM2(void){
      //
      EPWM_setDeadBandOutputSwapMode(EPWM2_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM2_BASE, EPWM_DB_OUTPUT_B, true);
-
+*/
      EALLOW;
      EPwm2Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
      EPwm2Regs.TZCTL.bit.TZB = TZ_FORCE_LO; // Force high-side low on trip
@@ -307,6 +351,9 @@ void initEPWM3(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM3_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+    EPWM_setCounterCompareShadowLoadMode(EPWM3_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -319,6 +366,7 @@ void initEPWM3(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_A, EPWM3_TIMER_TBPRD);
+    EPWM_setCounterCompareValue(EPWM3_BASE, EPWM_COUNTER_COMPARE_B, EPWM3_TIMER_TBPRD);
 
 
 
@@ -327,11 +375,11 @@ void initEPWM3(void){
     //
     EPWM_setActionQualifierAction(EPWM3_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM3_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM3_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -339,12 +387,29 @@ void initEPWM3(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM3_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 
 
-     //
+    EPWM_setActionQualifierAction(EPWM3_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM3_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM3_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM3_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
+     //
+/*
      //
        // Use EPWMA as the input for both RED and FED
        //
@@ -376,7 +441,7 @@ void initEPWM3(void){
      //
      EPWM_setDeadBandOutputSwapMode(EPWM3_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM3_BASE, EPWM_DB_OUTPUT_B, true);
-
+*/
 
      EALLOW;
      EPwm3Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
@@ -410,6 +475,10 @@ void initEPWM4(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM4_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+
+    EPWM_setCounterCompareShadowLoadMode(EPWM4_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -422,6 +491,7 @@ void initEPWM4(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_A, EPWM4_TIMER_TBPRD);
+    EPWM_setCounterCompareValue(EPWM4_BASE, EPWM_COUNTER_COMPARE_B, EPWM4_TIMER_TBPRD);
 
 
 
@@ -430,11 +500,11 @@ void initEPWM4(void){
     //
     EPWM_setActionQualifierAction(EPWM4_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM4_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM4_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -442,12 +512,28 @@ void initEPWM4(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM4_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 
+    EPWM_setActionQualifierAction(EPWM4_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM4_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM4_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM4_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
      //
-
+/*
      //
        // Use EPWMA as the input for both RED and FED
        //
@@ -480,7 +566,7 @@ void initEPWM4(void){
      EPWM_setDeadBandOutputSwapMode(EPWM4_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM4_BASE, EPWM_DB_OUTPUT_B, true);
 
-
+*/
      EALLOW;
      EPwm4Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
      EPwm4Regs.TZCTL.bit.TZB = TZ_FORCE_LO; // Force high-side low on trip
@@ -520,6 +606,10 @@ void initEPWM5(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM5_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+
+    EPWM_setCounterCompareShadowLoadMode(EPWM5_BASE,
+                                         EPWM_COUNTER_COMPARE_A,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -532,7 +622,7 @@ void initEPWM5(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_A, EPWM5_TIMER_TBPRD);
-
+    EPWM_setCounterCompareValue(EPWM5_BASE, EPWM_COUNTER_COMPARE_B, EPWM5_TIMER_TBPRD);
 
 
     //
@@ -540,11 +630,11 @@ void initEPWM5(void){
     //
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -552,10 +642,27 @@ void initEPWM5(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM5_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 
+    EPWM_setActionQualifierAction(EPWM5_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM5_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM5_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM5_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
+/*
      //
 
      //
@@ -590,7 +697,7 @@ void initEPWM5(void){
      EPWM_setDeadBandOutputSwapMode(EPWM5_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM5_BASE, EPWM_DB_OUTPUT_B, true);
 
-
+*/
      EALLOW;
      EPwm5Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
      EPwm5Regs.TZCTL.bit.TZB = TZ_FORCE_LO; // Force high-side low on trip
@@ -625,6 +732,9 @@ void initEPWM6(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM6_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+    EPWM_setCounterCompareShadowLoadMode(EPWM6_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -637,6 +747,7 @@ void initEPWM6(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM6_BASE, EPWM_COUNTER_COMPARE_A, EPWM6_TIMER_TBPRD);
+    EPWM_setCounterCompareValue(EPWM6_BASE, EPWM_COUNTER_COMPARE_B, EPWM6_TIMER_TBPRD);
 
 
 
@@ -645,11 +756,11 @@ void initEPWM6(void){
     //
     EPWM_setActionQualifierAction(EPWM6_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM6_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM6_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -657,10 +768,27 @@ void initEPWM6(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM6_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 
+    EPWM_setActionQualifierAction(EPWM6_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM6_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM6_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM6_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
+/*
      //
 
      //
@@ -694,7 +822,7 @@ void initEPWM6(void){
      //
      EPWM_setDeadBandOutputSwapMode(EPWM6_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM6_BASE, EPWM_DB_OUTPUT_B, true);
-
+*/
      EALLOW;
      EPwm6Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
      EPwm6Regs.TZCTL.bit.TZB = TZ_FORCE_LO; // Force high-side low on trip
@@ -727,6 +855,10 @@ void initEPWM7(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM7_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+
+    EPWM_setCounterCompareShadowLoadMode(EPWM7_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -739,6 +871,7 @@ void initEPWM7(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM7_BASE, EPWM_COUNTER_COMPARE_A, EPWM7_TIMER_TBPRD);
+    EPWM_setCounterCompareValue(EPWM7_BASE, EPWM_COUNTER_COMPARE_B, EPWM7_TIMER_TBPRD);
 
 
 
@@ -747,11 +880,11 @@ void initEPWM7(void){
     //
     EPWM_setActionQualifierAction(EPWM7_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM7_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM7_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -759,10 +892,27 @@ void initEPWM7(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM7_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
 
+    EPWM_setActionQualifierAction(EPWM7_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM7_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM7_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM7_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
+/*
      //
 
      //
@@ -796,7 +946,7 @@ void initEPWM7(void){
      //
      EPWM_setDeadBandOutputSwapMode(EPWM7_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM7_BASE, EPWM_DB_OUTPUT_B, true);
-
+*/
      EALLOW;
      EPwm7Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
      EPwm7Regs.TZCTL.bit.TZB = TZ_FORCE_LO; // Force high-side low on trip
@@ -829,6 +979,9 @@ void initEPWM8(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM8_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+    EPWM_setCounterCompareShadowLoadMode(EPWM8_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -841,32 +994,49 @@ void initEPWM8(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM8_BASE, EPWM_COUNTER_COMPARE_A, EPWM8_TIMER_TBPRD);
-
+    EPWM_setCounterCompareValue(EPWM8_BASE, EPWM_COUNTER_COMPARE_B, EPWM8_TIMER_TBPRD);
 
 
     //
-    // Set actions
-    //
-    EPWM_setActionQualifierAction(EPWM8_BASE,
-                                      EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
-                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
-    EPWM_setActionQualifierAction(EPWM8_BASE,
-                                      EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
-                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
-    EPWM_setActionQualifierAction(EPWM8_BASE,
-                                      EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_NO_CHANGE,
-                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
-    EPWM_setActionQualifierAction(EPWM8_BASE,
-                                      EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
-                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
+     // Set actions
+     //
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_A,
+                                       EPWM_AQ_OUTPUT_HIGH,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_A,
+                                       EPWM_AQ_OUTPUT_LOW,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_A,
+                                       EPWM_AQ_OUTPUT_NO_CHANGE,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_A,
+                                       EPWM_AQ_OUTPUT_HIGH,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
+
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_B,
+                                       EPWM_AQ_OUTPUT_LOW,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_B,
+                                       EPWM_AQ_OUTPUT_HIGH,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_B,
+                                       EPWM_AQ_OUTPUT_NO_CHANGE,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+     EPWM_setActionQualifierAction(EPWM8_BASE,
+                                       EPWM_AQ_OUTPUT_B,
+                                       EPWM_AQ_OUTPUT_LOW,
+                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
 
      //
-
+/*
      //
        // Use EPWMA as the input for both RED and FED
        //
@@ -898,7 +1068,7 @@ void initEPWM8(void){
      //
      EPWM_setDeadBandOutputSwapMode(EPWM8_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM8_BASE, EPWM_DB_OUTPUT_B, true);
-
+*/
      EALLOW;
      EPwm8Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
      EPwm8Regs.TZCTL.bit.TZB = TZ_FORCE_LO; // Force high-side low on trip
@@ -932,6 +1102,9 @@ void initEPWM9(void){
     EPWM_setCounterCompareShadowLoadMode(EPWM9_BASE,
                                          EPWM_COUNTER_COMPARE_A,
                                          EPWM_COMP_LOAD_ON_CNTR_ZERO);
+    EPWM_setCounterCompareShadowLoadMode(EPWM9_BASE,
+                                         EPWM_COUNTER_COMPARE_B,
+                                         EPWM_COMP_LOAD_ON_CNTR_ZERO);
     //
     // Set Compare values
     //
@@ -944,19 +1117,19 @@ void initEPWM9(void){
     // Set-up compare
     //
     EPWM_setCounterCompareValue(EPWM9_BASE, EPWM_COUNTER_COMPARE_A, EPWM9_TIMER_TBPRD);
+    EPWM_setCounterCompareValue(EPWM9_BASE, EPWM_COUNTER_COMPARE_B, EPWM9_TIMER_TBPRD);
 
 
 
-    //
     // Set actions
     //
     EPWM_setActionQualifierAction(EPWM9_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
     EPWM_setActionQualifierAction(EPWM9_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPA);
     EPWM_setActionQualifierAction(EPWM9_BASE,
                                       EPWM_AQ_OUTPUT_A,
@@ -964,8 +1137,25 @@ void initEPWM9(void){
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
     EPWM_setActionQualifierAction(EPWM9_BASE,
                                       EPWM_AQ_OUTPUT_A,
-                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_HIGH,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPA);
+
+    EPWM_setActionQualifierAction(EPWM9_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_ZERO);
+    EPWM_setActionQualifierAction(EPWM9_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_HIGH,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_UP_CMPB);
+    EPWM_setActionQualifierAction(EPWM9_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_NO_CHANGE,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_PERIOD);
+    EPWM_setActionQualifierAction(EPWM9_BASE,
+                                      EPWM_AQ_OUTPUT_B,
+                                      EPWM_AQ_OUTPUT_LOW,
+                                      EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
 
      //

@@ -125,15 +125,13 @@ float Dutylevel=0.01,dV=0;
 float wspdt=0;
 int res_on=0;
 int TurnOffInverter=0;
-int testModeOn = 0;
-float Udtestvalue = 0.0,Udtestvalue_old,Uqtestvalue = 0.0,Uqtestvalue_old;
 int Duty1f=0,Duty2f=0,Duty3f=0;
 uint32_t pom1=0, pom2=0, pom3=0, pom4=0, pom5=0,pom6=0, pom7=0, pom8=0, pom9=0, pom10=0, zm=0, cnt=0;
 uint16_t value=0, value2=0, cnt1=0;
 uint16_t x=0, y=0, z=0, p=0, rm1=0, rm2=0, rm3=0, x7=0, x8=0;
 float rad=0.0, theta=0.0, theta1=0.0, ma=0.0, theta2=0.0;
 uint32_t GPIO7;
-
+float rc_div=10;
 
 int RelayPRCH=0,RelayAC=0,RelayDC=0,RelayDC_p=0,delayrelay=0;
 
@@ -162,6 +160,15 @@ float res_mx7=1;
 float res_mx11=1;
 
 float rc_ki3,rc_ki5,rc_ki7,rc_ki11;
+float DT=0.01;
+int Latch1=0;
+int Latch2=0;
+int Latch3=0;
+int Latch4=0;
+int Latch5=0;
+int Latch6=0;
+
+float dutyrm=0.0;
 
 
 int zmiana_wyswietl = 0.0;
@@ -188,6 +195,8 @@ float Ts=0.00003204;
 float kp1=0.0, ti1=0.0, kp2=0.0, ti2=0.0;
 float kp3=0.0, ti3=1.0, kp4=0.0, ti4=0.0;
 float kpreg = 5.0, tireg = 0.01;
+int op=0,bal=0;
+float Udout_op,Uqout_op,UDC_op;
 
 float integral1=0.0, integral2=0.0, integral3=0.0;
 //
