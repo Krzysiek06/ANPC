@@ -123,7 +123,7 @@ int warunek;
 float Duty1=0.0, Duty2=0.0, Duty3=0.0, Duty4=0.0,Duty5=0.0, Duty6=0.0,Duty7=0.0, Duty8=0.0,Duty9=0.0,Duty10A=0.0, Duty10B=0.0, Duty11A=0.0, Duty11B=0.0, Duty12A=0.0, Duty12B=0.0, Duty13A=0.0, Duty13B=0.0;
 float Dutylevel=0.01,dV=0;
 float wspdt=0;
-int res_on=0;
+int res_on=1;
 int TurnOffInverter=0;
 int Duty1f=0,Duty2f=0,Duty3f=0;
 uint32_t pom1=0, pom2=0, pom3=0, pom4=0, pom5=0,pom6=0, pom7=0, pom8=0, pom9=0, pom10=0, zm=0, cnt=0;
@@ -159,7 +159,7 @@ float res_mx5=1;
 float res_mx7=1;
 float res_mx11=1;
 
-float rc_ki3,rc_ki5,rc_ki7,rc_ki11;
+float rc_ki3,rc_ki5,rc_ki7,rc_ki11,rc_ki13,rc_ki15;
 float DT=0.01;
 int Latch1=0;
 int Latch2=0;
@@ -195,7 +195,7 @@ float Ts=0.00003204;
 float kp1=0.0, ti1=0.0, kp2=0.0, ti2=0.0;
 float kp3=0.0, ti3=1.0, kp4=0.0, ti4=0.0;
 float kpreg = 5.0, tireg = 0.01;
-int op=0,bal=0;
+int op=0,bal=1;
 float Udout_op,Uqout_op,UDC_op;
 
 float integral1=0.0, integral2=0.0, integral3=0.0;

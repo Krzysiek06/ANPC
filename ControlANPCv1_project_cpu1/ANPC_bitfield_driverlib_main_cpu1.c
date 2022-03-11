@@ -39,7 +39,7 @@ protect zab;
 RegulatorPI reg1, reg2;
 sogi_init_struct si;
 sogi_stuct ss_alfa,ss_beta;
-RC_struct rc_init_a3,rc_init_a5,rc_init_a7,rc_init_a11,rc_init_b3,rc_init_b5,rc_init_b7,rc_init_b11;
+RC_struct rc_init_a3,rc_init_a5,rc_init_a7,rc_init_a11,rc_init_a13,rc_init_a15,rc_init_b3,rc_init_b5,rc_init_b7,rc_init_b11,rc_init_b13,rc_init_b15;
 
 void regulatorPI(float32 *out, float32 *integral, float32 in, float32 in_zad, float32 limp, float32 limn, float32 kp, float32 ti, float32 Ts1);
 
@@ -150,28 +150,38 @@ void main(void){
         rc_init_a5.K = 1.0;
         rc_init_a7.K = 1.0;
         rc_init_a11.K = 1.0;
+        rc_init_a13.K = 1.0;
+        rc_init_a15.K = 1.0;
 
         rc_init_b3.K = 1.0;
         rc_init_b5.K = 1.0;
         rc_init_b7.K = 1.0;
         rc_init_b11.K = 1.0;
+        rc_init_b13.K = 1.0;
+        rc_init_b15.K = 1.0;
 
         rc_wcut=0.02;
         rc_div=10;
         rc_ki3=5000/rc_div;
-        rc_ki5=20000/rc_div;
+        rc_ki5=20000/rc_div;  //*5
         rc_ki7=20000/rc_div;
         rc_ki11=15000/rc_div;
+        rc_ki13=1000;
+        rc_ki15=2000;
 
         RC_init(&rc_init_a3,3,rc_wcut,rc_ki3,Ts);
         RC_init(&rc_init_a5,5,rc_wcut,rc_ki5,Ts);
         RC_init(&rc_init_a7,7,rc_wcut,rc_ki7,Ts);
         RC_init(&rc_init_a11,11,rc_wcut,rc_ki11,Ts);
+        RC_init(&rc_init_a13,13,rc_wcut,rc_ki13,Ts);
+        RC_init(&rc_init_a15,15,rc_wcut,rc_ki15,Ts);
 
         RC_init(&rc_init_b3,3,rc_wcut,rc_ki3,Ts);
         RC_init(&rc_init_b5,5,rc_wcut,rc_ki5,Ts);
         RC_init(&rc_init_b7,7,rc_wcut,rc_ki7,Ts);
         RC_init(&rc_init_b11,11,rc_wcut,rc_ki11,Ts);
+        RC_init(&rc_init_b13,13,rc_wcut,rc_ki13,Ts);
+        RC_init(&rc_init_b15,15,rc_wcut,rc_ki15,Ts);
         kDC=0.1;
 
         Fir_UI_AC=0.4;
@@ -1152,15 +1162,19 @@ __interrupt void epwm1ISR(void)
              RC_exec(&rc_init_a3,Ialfaref-Ia,res_mx3);
              RC_exec(&rc_init_a5,Ialfaref-Ia,res_mx5);
              RC_exec(&rc_init_a7,Ialfaref-Ia,res_mx7);
-             //RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
-             Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01;
+             RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
+             //RC_exec(&rc_init_a13,Ialfaref-Ia,res_mx11);
+             //RC_exec(&rc_init_a15,Ialfaref-Ia,res_mx11);
+             Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01 + rc_init_a11.y_res01;// + rc_init_a13.y_res01;// + rc_init_a15.y_res01;
              //+ rc_init_a11.y_res01
 
              RC_exec(&rc_init_b3,Ibetaref-Ib,res_mx3);
              RC_exec(&rc_init_b5,Ibetaref-Ib,res_mx5);
              RC_exec(&rc_init_b7,Ibetaref-Ib,res_mx7);
-             //RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
-             Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01;
+             RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
+             //RC_exec(&rc_init_b13,Ibetaref-Ib,res_mx11);
+             //RC_exec(&rc_init_b15,Ibetaref-Ib,res_mx11);
+             Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01 + rc_init_b11.y_res01;// + rc_init_b13.y_res01;// + rc_init_b15.y_res01;
              // + rc_init_b11.y_res01
              if(res_on==1)
              {
