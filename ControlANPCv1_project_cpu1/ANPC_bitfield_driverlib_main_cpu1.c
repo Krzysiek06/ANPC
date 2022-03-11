@@ -403,7 +403,7 @@ __interrupt void epwm1ISR(void)
     Duty1 = tablicapll[j];
     j++;
 
-             //Modulator SPWM wersja a
+             //Modulator SPWM wersja A
               //Pierwsza GALZ
              if(Duty1>(DT)){
 
