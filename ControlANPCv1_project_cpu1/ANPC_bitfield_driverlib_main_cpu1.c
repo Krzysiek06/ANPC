@@ -401,6 +401,8 @@ __interrupt void epwm1ISR(void)
     //Duty1=kp2;
     if (j>999) j=0;
     Duty1 = tablicapll[j];
+    Duty2 = tablicapll[j];
+    Duty3 = tablicapll[j];
     j++;
 
              //Modulator SPWM wersja A
@@ -1278,8 +1280,8 @@ __interrupt void epwm1ISR(void)
 
          }else{
              //Duty1=0.0;
-             Duty2=0.0;
-             Duty3=0.0;
+             //Duty2=0.0;
+            // Duty3=0.0;
          }
 
          //Modulator SPWM wersja A

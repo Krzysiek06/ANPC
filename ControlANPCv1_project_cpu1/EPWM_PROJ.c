@@ -1157,7 +1157,7 @@ void initEPWM9(void){
                                       EPWM_AQ_OUTPUT_LOW,
                                       EPWM_AQ_OUTPUT_ON_TIMEBASE_DOWN_CMPB);
 
-
+/*
      //
 
      //
@@ -1191,7 +1191,7 @@ void initEPWM9(void){
      //
      EPWM_setDeadBandOutputSwapMode(EPWM9_BASE, EPWM_DB_OUTPUT_A, true);
      EPWM_setDeadBandOutputSwapMode(EPWM9_BASE, EPWM_DB_OUTPUT_B, true);
-
+*/
      EALLOW;
      EPwm9Regs.TZCTL.bit.TZA = TZ_FORCE_LO; // Force high-side low on trip
      EPwm9Regs.TZCTL.bit.TZB = TZ_FORCE_LO; // Force high-side low on trip
