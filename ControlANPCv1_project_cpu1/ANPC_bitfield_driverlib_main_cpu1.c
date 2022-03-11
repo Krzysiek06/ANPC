@@ -650,7 +650,7 @@ __interrupt void epwm1ISR(void)
                           EPwm2Regs.CMPB.bit.CMPB=(Duty1+DT)*EPWM2_TIMER_TBPRD;
 
                           EPwm3Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
-                          EPwm3Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+                          EPwm3Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
 
 
                       }
@@ -698,7 +698,7 @@ __interrupt void epwm1ISR(void)
                           EPwm5Regs.CMPB.bit.CMPB=(Duty2+DT)*EPWM2_TIMER_TBPRD;
 
                           EPwm6Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
-                          EPwm6Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+                          EPwm6Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
                       }
                       if(Duty2<=(DT) && Duty2>=(-1*(DT))){
 
@@ -743,7 +743,7 @@ __interrupt void epwm1ISR(void)
                            EPwm8Regs.CMPB.bit.CMPB=(Duty3+DT)*EPWM2_TIMER_TBPRD;
 
                            EPwm9Regs.CMPA.bit.CMPA=0.0*EPWM3_TIMER_TBPRD;
-                           EPwm9Regs.CMPB.bit.CMPB=1.0*EPWM3_TIMER_TBPRD;
+                           EPwm9Regs.CMPB.bit.CMPB=0.0*EPWM3_TIMER_TBPRD;
                        }
                        if(Duty3<=(DT) && Duty3>=(-1*(DT))){
 
