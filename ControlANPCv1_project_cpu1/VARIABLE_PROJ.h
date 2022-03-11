@@ -249,10 +249,10 @@ float timerscal=0;
 
 float Uacmax = 500.0;
 float Uacmin = -500.0;
-float Udcmax = 600.0;
+float Udcmax = 1000.0;
 float Udcmin = -500.0;
-float Iacmax = 15.0;
-float Iacmin = -15.0;
+float Iacmax = 20.0;
+float Iacmin = -20.0;
 float Idcmax = 28.0;
 float Idcmin = -28.0;
 
