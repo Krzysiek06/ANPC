@@ -402,7 +402,7 @@ __interrupt void epwm1ISR(void)
     if (j>999) j=0;
     Duty1 = tablicapll[j];
     j++;
-
+/*
              //Modulator SPWM wersja a
               //Pierwsza GALZ
              if(Duty1>(DT)){
@@ -636,9 +636,9 @@ __interrupt void epwm1ISR(void)
 
              }
 
+*/
 
 
-/*
              //Modulator SPWM wersja C
              // Galaz Pierwsza
                       if(Duty1>(DT)){
@@ -776,7 +776,7 @@ __interrupt void epwm1ISR(void)
                            EPwm9Regs.CMPA.bit.CMPA=((-Duty3-DT))*EPWM3_TIMER_TBPRD;
                            EPwm9Regs.CMPB.bit.CMPB=((-Duty3+DT))*EPWM3_TIMER_TBPRD;
                         }
-*/
+
 
 
     pomiary();      //Zebranie wartoœci pomiarów z przetworników A/D 16bit single
