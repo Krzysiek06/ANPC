@@ -165,8 +165,9 @@ void main(void){
         rc_ki3=5000/rc_div;
         rc_ki5=20000/rc_div;  //*5
         rc_ki7=20000/rc_div;
-        rc_ki11=15000/rc_div;
-        rc_ki13=1000;
+        //rc_ki11=15000/rc_div;
+        rc_ki11=20000/rc_div;
+        rc_ki13=5000;
         rc_ki15=2000;
 
         RC_init(&rc_init_a3,3,rc_wcut,rc_ki3,Ts);
@@ -1097,7 +1098,7 @@ __interrupt void epwm1ISR(void)
         break;
 
     case 14:
-        wspdt = kp4*0.01;
+        wspdt = (kp4-5)*0.01;
         break;
 
     case 16:
@@ -1111,6 +1112,10 @@ __interrupt void epwm1ISR(void)
     case 20:
         kpU = kp4;
         tiU = ti3;
+        break;
+    case 21:
+        rc_init_a13.K = kp4;
+        rc_init_b13.K = kp4;
         break;
     }
     //
@@ -1148,7 +1153,7 @@ __interrupt void epwm1ISR(void)
              //integral1=0;
 
              //integral2=0;
-             regulatorPI(&Uq1, &integral2, Iq, 0, 30, -30, kpreg, tireg*0.01, Ts);        //Regulator pradu w osi q
+             regulatorPI(&Uq1, &integral2, Iq, Urefd-10, 30, -30, kpreg, tireg*0.01, Ts);        //Regulator pradu w osi q
              //integral2=0;
              Udout=Ud1-Ud-omegaL*Iq;
              Uqout=Uq1-Uq+omegaL*Id;
@@ -1158,26 +1163,26 @@ __interrupt void epwm1ISR(void)
              dqtoalfabeta(&Ialfaref,&Ibetaref, Idramp, 0, theta2);
 
              // Proportional Resonant Controller
-             Kp_RC = kp3;
-             RC_exec(&rc_init_a3,Ialfaref-Ia,res_mx3);
-             RC_exec(&rc_init_a5,Ialfaref-Ia,res_mx5);
-             RC_exec(&rc_init_a7,Ialfaref-Ia,res_mx7);
-             RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
-             //RC_exec(&rc_init_a13,Ialfaref-Ia,res_mx11);
-             //RC_exec(&rc_init_a15,Ialfaref-Ia,res_mx11);
-             Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01 + rc_init_a11.y_res01;// + rc_init_a13.y_res01;// + rc_init_a15.y_res01;
-             //+ rc_init_a11.y_res01
+             if(res_on==1){
+                 Kp_RC = kp3;
+                 RC_exec(&rc_init_a3,Ialfaref-Ia,res_mx3);
+                 RC_exec(&rc_init_a5,Ialfaref-Ia,res_mx5);
+                 RC_exec(&rc_init_a7,Ialfaref-Ia,res_mx7);
+                 //RC_exec(&rc_init_a11,Ialfaref-Ia,res_mx11);
+                 //RC_exec(&rc_init_a13,Ialfaref-Ia,res_mx11);
+                 //RC_exec(&rc_init_a15,Ialfaref-Ia,res_mx11);
+                 Ialfa_out = Kp_RC * (Ialfaref-Ia) + rc_init_a3.y_res01 + rc_init_a5.y_res01 + rc_init_a7.y_res01;// + rc_init_a11.y_res01;// + rc_init_a13.y_res01;// + rc_init_a15.y_res01;
+                 //+ rc_init_a11.y_res01
 
-             RC_exec(&rc_init_b3,Ibetaref-Ib,res_mx3);
-             RC_exec(&rc_init_b5,Ibetaref-Ib,res_mx5);
-             RC_exec(&rc_init_b7,Ibetaref-Ib,res_mx7);
-             RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
-             //RC_exec(&rc_init_b13,Ibetaref-Ib,res_mx11);
-             //RC_exec(&rc_init_b15,Ibetaref-Ib,res_mx11);
-             Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01 + rc_init_b11.y_res01;// + rc_init_b13.y_res01;// + rc_init_b15.y_res01;
-             // + rc_init_b11.y_res01
-             if(res_on==1)
-             {
+                 RC_exec(&rc_init_b3,Ibetaref-Ib,res_mx3);
+                 RC_exec(&rc_init_b5,Ibetaref-Ib,res_mx5);
+                 RC_exec(&rc_init_b7,Ibetaref-Ib,res_mx7);
+                 //RC_exec(&rc_init_b11,Ibetaref-Ib,res_mx11);
+                 //RC_exec(&rc_init_b13,Ibetaref-Ib,res_mx11);
+                 //RC_exec(&rc_init_b15,Ibetaref-Ib,res_mx11);
+                 Ibeta_out = Kp_RC * (Ibetaref-Ib) + rc_init_b3.y_res01 + rc_init_b5.y_res01 + rc_init_b7.y_res01;// + rc_init_b11.y_res01;// + rc_init_b13.y_res01;// + rc_init_b15.y_res01;
+                 // + rc_init_b11.y_res01
+
                  Ualfaout=Ualfaout+Ialfa_out;
                  Ubetaout=Ubetaout+Ibeta_out;
              }
